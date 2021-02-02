@@ -20,10 +20,10 @@ persistence_type=NULL)
 \arguments{
 \item{id}{Character. The ID used to identify this component in Dash callbacks.}
 
-\item{selected}{Character. The ID of the selected node, retains functions of previous 'selected' prop}
+\item{selected}{Character. [Pending Deprecation] The ID of the selected node.
+Please use selected_node (or selected_edge for edges)}
 
-\item{selected_node}{Character. The ID of the selected node. Placeholder for superceding 'selected' prop.
-Same functionality as 'selected'}
+\item{selected_node}{Character. The ID of the selected node.}
 
 \item{selected_edge}{Character. The ID of the selected edge.}
 

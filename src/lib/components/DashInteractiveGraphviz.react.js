@@ -39,13 +39,43 @@ class DashInteractiveGraphviz extends Component {
                     }
                 })
                 .renderDot(dot_source);
+
+                var labelPositions = []
+                var svg = d3.select('#graph0')
+                var paths = svg.selectAll('.edge').selectAll('path').each(
+                    function (d,i){
+                        var bounds = d.bbox;
+                        labelPositions.push({
+                          x: bounds.x + bounds.width / 2,
+                          y: bounds.y + bounds.height / 2
+                        });
+                    }
+                );
+
+                var labels = svg.append('svg:g').selectAll('.labels');
+                labels = labels.data(labelPositions);
+                labels.exit().remove();
+
+                labels.enter()
+                    .append("text")
+                    .classed("linklabel", true)
+                    .text(function(d, i){ return i; })
+                    .attr({
+                        x: function(d){
+                            return d.x;},
+                        y: function(d){return d.y;}
+                    });
+
         } catch (e) {
             //Syntax error, Do nothing.
+            console.error(e)
         }
     }
 
     fitGraph() {
         d3.select('.graph').graphviz().fit(true).resetZoom();
+
+        
     }
 
     onNodeClick(node) {
