@@ -22,49 +22,27 @@ class DashInteractiveGraphviz extends Component {
         const onNodeClick = (node) => this.onNodeClick(node);
         const onEdgeClick = (edge) => this.onEdgeClick(edge)
         try {
+            const self  =this;
             d3.select('.graph')
                 .graphviz()
                 .engine(engine)
                 .width(size.width)
                 .height(size.height)
                 .fit(true)
-                .transition(
-                    d3.transition('main').ease(d3.easeLinear).duration(1000)
-                )
+                // .transition(
+                //     d3.transition('main').ease(d3.easeLinear).duration(1000)
+                // )
                 .attributer(function (d, i, g) {
                     if (onNodeClick && d.attributes.class === 'node') {
-                        this.onclick = () => onNodeClick(d.key);
+                        self.onclick = () => onNodeClick(d.key);
                     } else if (onEdgeClick && d.attributes.class === 'edge'){
-                        this.onclick = () => onEdgeClick(d.key);
+                        self.onclick = () => onEdgeClick(d.key);
                     }
+
                 })
                 .renderDot(dot_source);
+            self.drawLabels()
 
-                var labelPositions = []
-                var svg = d3.select('#graph0')
-                var paths = svg.selectAll('.edge').selectAll('path').each(
-                    function (d,i){
-                        var bounds = d.bbox;
-                        labelPositions.push({
-                          x: bounds.x + bounds.width / 2,
-                          y: bounds.y + bounds.height / 2
-                        });
-                    }
-                );
-
-                var labels = svg.append('svg:g').selectAll('.labels');
-                labels = labels.data(labelPositions);
-                labels.exit().remove();
-
-                labels.enter()
-                    .append("text")
-                    .classed("linklabel", true)
-                    .text(function(d, i){ return i; })
-                    .attr({
-                        x: function(d){
-                            return d.x;},
-                        y: function(d){return d.y;}
-                    });
 
         } catch (e) {
             //Syntax error, Do nothing.
@@ -72,10 +50,42 @@ class DashInteractiveGraphviz extends Component {
         }
     }
 
+    // Returns an attrTween for translating along the specified path element.
+    positionAlong(path, p ){
+        var l = path.getTotalLength();
+        var pt = path.children.getPointAtLength(p* l);
+        return pt
+    }
+
+    drawLabels(){
+        var labelPositions = []
+        var svg = d3.select('#graph0')
+        var self = this
+        svg.selectAll('.edge').selectAll('path').each(
+            function (d){
+                var pt = self.positionAlong(d,0.5)
+                labelPositions.push({
+                  x: pt.x,
+                  y: pt.y
+                });
+            }
+        );
+
+        var labels = svg.append('svg:g').selectAll('.labels');
+        labels.exit().remove();
+        labels = labels.data(labelPositions);
+        labels.exit().remove();
+
+        labels.enter()
+            .append("text")
+            .classed("linklabel", true)
+            .text(function(d, i){ return i})
+            .attr('x' ,function(d){return d.x})
+            .attr('y' ,function(d){return d.y});
+    }
+
     fitGraph() {
         d3.select('.graph').graphviz().fit(true).resetZoom();
-
-        
     }
 
     onNodeClick(node) {
